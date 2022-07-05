@@ -356,8 +356,6 @@ def anova():
     plt.tight_layout()
     plt.show()
 
-    visuals.vis_minecraft(data, as_voxels=True)
-
 
 if __name__ == '__main__':
     anova()
