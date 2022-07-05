@@ -1,3 +1,5 @@
+from typing import List
+
 import numpy as np
 import persim
 from ripser import ripser
@@ -116,6 +118,33 @@ def count_features(barcode_diagram, persistence_diagram, eps: float):
     persistence_count = np.sum(persistence_diagram[:,1] >= eps)
 
     return barcode_count, persistence_count
+
+
+def estimate_features(distances: List[float], diagrams: List[np.ndarray]):
+    """
+    Estimates the number of features by using a consensus voting method.
+
+    Given a list of values, find the peaks and count the number of features.
+    Take the `consensus` to yield an estimate of the number of total features.
+
+    Parameters
+    ----------
+    distances : List[float]
+        A list of floats representing distances between consecutive persistence diagrams.
+    diagrams : List[np.ndarray]
+        A list of persistence diagrams.
+    """
+    # find the peaks
+    peak_idx = []
+    for idx, (prev_dist, curr_dist, next_dist) in enumerate(zip(distances[:-2], distances[1:-1], distances[2:]), start=1):
+        if (curr_dist >= prev_dist) and (curr_dist >= next_dist):
+            peak_idx.append(idx)
+    # retrieve the peaks
+    print(f'{peak_idx=}\n{len(diagrams)}')
+    feature_counts = np.array([count_features(diagrams[idx][0], diagrams[idx][0], eps=0.1) for idx in peak_idx])
+    barcode_est, persistence_est = np.average(feature_counts[:,0], weights=np.exp(feature_counts[:,0])), np.average(feature_counts[:,1], weights=np.exp(feature_counts[:,1]))
+    
+    return barcode_est, persistence_est
 
 
 def show_diagrams(diagrams, 

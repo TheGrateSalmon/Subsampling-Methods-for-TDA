@@ -296,7 +296,7 @@ def anova():
                             labels=['Target'], title=f'$H_{0}$ Diagrams', ax=ax2, colormap=mpl_style, alpha=0.75)
 
     d_anovas = []
-    num_epochs = 20
+    num_epochs = 25
     prev_diagram = diagrams
     prev_diagrams = []
     curr_diagrams = []
@@ -318,6 +318,7 @@ def anova():
         curr_diagrams.append(curr_diagram)
         
         # plot diagrams
+        plt.clf()
         fig, ax = plt.subplots(2, 2, figsize=(2*ax_size[0], 2*ax_size[1]))
         for i, diagram in enumerate([prev_diagram, curr_diagram]):
             subsample.show_diagrams([diagram[0]],
@@ -337,24 +338,16 @@ def anova():
     print()
     # IMPLEMENT: consensus voting with number of peaks to determine average number of features predicted
     # IDEA: weight higher peaks more
-    peak_idx = np.argmax(d_anovas)
-    barcode_diagram, persistence_diagram = prev_diagrams[peak_idx], prev_diagrams[peak_idx]
-    print(f'Number of features: {subsample.count_features(barcode_diagram[0], persistence_diagram[0], 0.1)}')
-    if (peak_idx != 0) and (peak_idx != num_epochs):
-        with np.printoptions(precision=4, suppress=True):
-            for idx in [peak_idx-1, peak_idx, peak_idx+1]:
-                print(f'{prev_diagrams[idx][0][:,1]}')
-            print()
-            print(f'{prev_diagrams[peak_idx][0][:,1] - prev_diagrams[peak_idx-1][0][:,1]}')
-            print(f'{prev_diagrams[peak_idx+1][0][:,1] - prev_diagrams[peak_idx][0][:,1]}')
-    # plot d_anova over time
+    # STATUS: DONE
+    print(subsample.estimate_features(d_anovas, prev_diagrams))
     plt.clf()
-    plt.plot([k for k, _ in enumerate(d_anovas, start=1)], d_anovas)
+    plt.plot([k for k, _ in enumerate(d_anovas, start=0)], d_anovas)
     plt.ylabel('$d_{anova}$')
     plt.xlabel('(New) Epoch')
-    plt.xticks([k for k, _ in enumerate(d_anovas, start=1)])
+    plt.xticks([k for k, _ in enumerate(d_anovas, start=0)])
     plt.tight_layout()
-    plt.show()
+    plt.savefig(f'./plots/d_anovas.png')
+    plt.close()
 
 
 if __name__ == '__main__':
